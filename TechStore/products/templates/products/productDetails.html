@@ -1,0 +1,246 @@
+{% extends "productDetailBase.html" %}
+{% block head %}
+{% load static %}
+{% load custom_filters %}
+<link rel="stylesheet" href="{% static 'products/css/productDetails.css' %}">
+{% endblock %}
+{% block content %}
+<div class="product-wrapper">
+
+    <div class="product-left">
+        {% if main_image %}
+        <img id="mainImage" src="{{ main_image.url }}" class="main-image">
+        {% endif %}
+
+        <div class="thumbnail-list">
+            {% for img in images %}
+            <img src="{{ img.image.url }}"
+                 onclick="changeImage(this)">
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="product-right">
+        <h1>{{ product.name }}</h1>
+
+        <!-- Giá -->
+        {% if discount %}
+        <div class="price">
+                <span class="price-old">
+                    {{ discount.formatted_price }}
+                </span>
+            <span class="price-new">
+                    {{ discount.formatted_priceD }}
+                </span>
+        </div>
+        {% else %}
+        <div class="price">
+            {{ product.formatted_price }}
+        </div>
+        {% endif %}
+
+        <ul class="info">
+            <li>Hãng: {{ product.brand }}</li>
+            <li>Model: {{ product.model }}</li>
+            <li>Bảo hành: {{ product.warranty_month }} tháng</li>
+            <li>Đánh giá: <span class="comment-rating" style="color: #FFD700">
+                      {% if ratingAVG > 0 %}
+                          {% for i in "12345"|slice:ratingAVG|make_list %}
+                              ★
+                          {% endfor %}
+                      {% else %}
+                          <span style="color: black">Chưa có đánh giá</span>
+                      {% endif %}
+                    </span></li>
+        </ul>
+
+        <div class="actions">
+            <form method="post" action="{% url 'add_to_cart' product.id %}">
+                {% csrf_token %}
+                <input type="number" name="quantity" value="1" min="1">
+                <button type="submit" class="btn-cart">Thêm vào giỏ hàng</button>
+            </form>
+
+            <form method="post" action="{% url 'buy_now' product.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn-buy">Mua ngay</button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="product-section info">
+
+    <div class="description-part">
+        <h2>Mô tả sản phẩm</h2>
+        <div class="content">
+            {{ product.description|safe }}
+        </div>
+    </div>
+
+    <div class="specs-part">
+        <h2>Thông số kỹ thuật</h2>
+        <table class="spec-table">
+            {% for attr in attributes %}
+            <tr>
+                <th>{{ attr.attribute }}</th>
+                <td>{{ attr.value }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2">Chưa có thông số kỹ thuật</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+<div class="product-section comment">
+
+{% if can_comment %}
+    <div class="manage-review">
+        <button id="writeReviewBtn">Viết đánh giá</button>
+    </div>
+
+    <form id="reviewForm" method="post" action="{% url 'addComment' product.id %}">
+        {% csrf_token %}
+        <h3>Viết đánh giá</h3>
+
+        <select id="reviewStars" name="rating" required>
+            <option value="5">★★★★★</option>
+            <option value="4">★★★★</option>
+            <option value="3">★★★</option>
+            <option value="2">★★</option>
+            <option value="1">★</option>
+        </select>
+
+        <textarea name="content" rows="4" placeholder="Nội dung đánh giá..." required></textarea>
+        <button id="submitReview" type="submit">Hoàn thành</button>
+    </form>
+
+{% elif has_commented %}
+    <p style="color: green; font-weight: 500; margin-top: 10px;">
+         Bạn đã đánh giá sản phẩm này rồi !
+    </p>
+
+{% else %}
+    <p style="color: red; margin-top: 10px;">
+         Bạn chỉ có thể đánh giá khi đã mua sản phẩm này !
+    </p>
+{% endif %}
+
+    <div class="sort-area">
+        <select id="ratingFilter">
+            <option value="">Tất cả ({{ comments|length }})</option>
+            <option value="5">5 sao ({{ rating_count.5 }})</option>
+            <option value="4">4 sao ({{ rating_count.4 }})</option>
+            <option value="3">3 sao ({{ rating_count.3 }})</option>
+            <option value="2">2 sao ({{ rating_count.2 }})</option>
+            <option value="1">1 sao ({{ rating_count.1 }})</option>
+            <option value="positive">Tích cực</option>
+            <option value="negative">Tiêu cực</option>
+        </select>
+    </div>
+    <div id="commentSection">
+        <div class="comment-list">
+            <h3>
+      Đánh giá
+    <span style="font-size: 14px; font-weight: normal; color: #555;">
+        {% if positive_count > 0 or negative_count > 0 %}
+            (Tích cực: {{ positive_count }}, Tiêu cực: {{ negative_count }})
+        {% else %}
+            (Tích cực: 0, Tiêu cực: 0)
+        {% endif %}
+    </span>
+            </h3>
+            {% for comment in comments %}
+            <div class="comment-item">
+                <div class="comment-header">
+                <span class="comment-author">
+                    {{ comment.customer.full_name }}
+                </span>
+                    <span class="comment-date">
+                    {{ comment.created_at|date:"d/m/Y H:i" }}
+                </span>
+                </div>
+                <p class="comment-rating" style="color: #FFD700">
+                    {% for i in "12345"|slice:comment.rating %}★{% endfor %}
+                </p>
+                <p class="comment-text">
+                    "{{ comment.content }}"
+                </p>
+                {% if comment.is_spam %}
+                    <span style="color:red; font-weight:bold;">[SPAM]</span>
+                {% else %}
+                    <p>{{ comment.label }}</p>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p>Chưa có bình luận nào cho sản phẩm này.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+    document.getElementById('ratingFilter').addEventListener('change', function () {
+        const value = this.value;
+
+        let url = "{% url 'productDetail' product.id %}";
+        if (value) {
+            url += "?filter=" + value;
+        }
+
+        fetch(url)
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newComments = doc.querySelector('#commentSection').innerHTML;
+                    document.getElementById('commentSection').innerHTML = newComments;
+                });
+    });
+</script>
+<script>
+const reviewForm = document.getElementById('reviewForm');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form = this;
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: formData
+            })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Submit failed");
+                        return res.text();
+                    })
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newComments = doc.querySelector('#commentSection').innerHTML;
+
+                        document.getElementById('commentSection').innerHTML = newComments;
+
+                        form.reset();
+                        form.style.display = 'none';
+                    })
+                    .catch(err => {
+                        alert("Gửi đánh giá thất bại");
+                        console.error(err);
+                    });
+        });
+    }
+
+</script>
+<script src="{% static 'products/js/productDetails.js' %}"></script>
+{% endblock %}

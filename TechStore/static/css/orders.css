@@ -1,0 +1,240 @@
+/* ======================
+   RESET & BASE
+====================== */
+.orders-section {
+    background: #ffffff;
+    font-family: inherit;
+}
+
+/* ======================
+   HEADER
+====================== */
+.orders-section h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 6px;
+}
+
+.orders-section p {
+    font-size: 15px;
+    color: #555;
+}
+
+/* ======================
+   ORDER CARD
+====================== */
+.order-box {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin-top: 22px;
+    transition: all 0.25s ease;
+}
+
+.order-box:hover {
+    border-color: #2563eb;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ======================
+   HEADER ORDER
+====================== */
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-header h4 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.order-status {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+/* ======================
+   INFO
+====================== */
+.order-info {
+    margin-top: 6px;
+}
+
+.order-info p {
+    font-size: 15px;
+    color: #333;
+    margin: 4px 0;
+}
+
+.order-total {
+    font-size: 17px;
+    font-weight: 700;
+    color: #dc2626;
+    margin-top: 8px;
+}
+
+/* ======================
+   DETAILS
+====================== */
+.order-details {
+    margin-top: 18px;
+}
+
+.order-details summary {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2563eb;
+    cursor: pointer;
+}
+
+.order-details summary:hover {
+    text-decoration: underline;
+}
+
+/* ======================
+   TABLE
+====================== */
+.order-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+}
+
+.order-detail-table th,
+.order-detail-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.order-detail-table th {
+    font-weight: 600;
+    background: #fafafa;
+}
+
+.order-detail-table th:nth-child(1),
+.order-detail-table td:nth-child(1) {
+    width: 12%;
+    text-align: center;
+}
+
+.order-detail-table th:nth-child(2),
+.order-detail-table td:nth-child(2) {
+    width: 38%;
+    text-align: left;
+}
+
+.order-detail-table th:nth-child(3),
+.order-detail-table td:nth-child(3) {
+    width: 12%;
+    text-align: center;
+}
+
+.order-detail-table th:nth-child(4),
+.order-detail-table td:nth-child(4) {
+    width: 18%;
+    text-align: right;
+}
+
+.order-detail-table th:nth-child(5),
+.order-detail-table td:nth-child(5) {
+    width: 20%;
+    text-align: center;
+}
+
+/* Ảnh sản phẩm */
+.order-detail-table img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+/* ======================
+   BUTTON
+====================== */
+.btn-cancel {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #ef4444;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s;
+    text-align: center;
+}
+
+
+.btn-cancel:hover {
+   background: #dc2626;
+}
+.btn-review{
+    display: inline-block;
+    padding: 6px 14px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s;
+    text-align: center;
+}
+.btn-review:hover{
+    background: #059669;
+}
+/* Đã đánh giá */
+.reviewed-text {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+/* ======================
+   TOTAL
+====================== */
+.order-detail-total {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 17px;
+    font-weight: 700;
+    margin-top: 12px;
+    color: #dc2626;
+}
+
+/* ======================
+   RESPONSIVE
+====================== */
+@media (max-width: 768px) {
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .order-detail-table th,
+    .order-detail-table td {
+        font-size: 13px;
+    }
+}
+.order-box.cancelled {
+    opacity: 0.6;
+    background: #f8f8f8;
+}
+
+.order-status.cancelled {
+    color: #dc2626;
+    font-weight: bold;
+}

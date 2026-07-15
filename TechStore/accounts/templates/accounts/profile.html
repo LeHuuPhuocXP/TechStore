@@ -1,0 +1,434 @@
+{% extends "userBase.html" %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% load humanize %}
+{% endblock %}
+
+{% block content %}
+
+<body>
+
+
+<div class="container-user">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="user-info">
+            <div class="avatar-wrapper">
+                <img src="{% static 'TechStore/media/avt/s.png' %}" class="avatar-img">
+                <span class="avatar-camera"><i class="bi bi-camera-fill"></i></span>
+            </div>
+            <p class="username">{{ customer.full_name }}</p>
+
+        </div>
+
+        <nav class="menu">
+            <ul>
+                <!-- Hồ sơ -->
+                <li class="{% if active_section == 'profile' %}active{% endif %}">
+                    <a href="{% url 'profile' %}">Tài khoản của tôi</a>
+                </li>
+
+                <!-- Đổi mật khẩu -->
+                <li class="{% if active_section == 'password' %}active{% endif %}">
+                    <a href="{% url 'profile_password' %}">Đổi mật khẩu</a>
+                </li>
+
+                <!-- Đơn mua -->
+                <li class="{% if active_section == 'orders' %}active{% endif %}">
+                    <a href="{% url 'profile_orders' %}">Đơn mua</a>
+                </li>
+
+                <!--  Đơn đã huỷ -->
+        <li class="{% if active_section == 'cancelled_orders' %}active{% endif %}">
+            <a href="{% url 'profile_cancelled_orders' %}">Đơn đã huỷ</a>
+        </li>
+
+                <!-- Địa chỉ nhận hàng -->
+                <li class="{% if active_section == 'address' %}active{% endif %}">
+                    <a href="{% url 'profile_address' %}">Địa chỉ nhận hàng</a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+        <div class="logout-section">
+            <a href="{% url 'logout' %}">
+                <button id="logoutBtn">Đăng xuất</button>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Nội dung chính -->
+    <main class="content">
+        <!-- Hồ sơ -->
+        <section class="section {% if active_section == 'profile' %}active{% endif %}">
+            <h2>Hồ sơ của tôi</h2>
+            <p class="desc">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
+
+            <form class="profile-form" method="post" action="{% url 'profile' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Họ và tên</label>
+                    <input type="text" name="full_name" value="{{ customer.full_name }}">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{ customer.email }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Số điện thoại</label>
+                    <input type="tel" name="phone" value="{{ customer.phone }}">
+                </div>
+                <div class="form-group">
+                    <label>Ngày sinh</label>
+                    <input type="date" name="date_of_birth" value="{{ customer.date_of_birth|date:'Y-m-d' }}">
+                </div>
+                <div class="form-group">
+                    <label>Giới tính</label>
+                    <select name="gender">
+                        <option value="Nam" {% if customer.gender == 'Nam' %}selected{% endif %}>Nam</option>
+                        <option value="Nữ" {% if customer.gender == 'Nữ' %}selected{% endif %}>Nữ</option>
+                        <option value="Khác" {% if customer.gender == 'Khác' %}selected{% endif %}>Khác</option>
+                    </select>
+                </div>
+                <button class="save-btn" type="submit">Lưu</button>
+            </form>
+        </section>
+
+        <!-- Đổi mật khẩu -->
+        <section class="section {% if active_section == 'password' %}active{% endif %}">
+            <h2>Đổi mật khẩu</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Mật khẩu hiện tại</label>
+                    <input type="password" name="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu mới</label>
+                    <input type="password" name="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Nhập lại mật khẩu mới</label>
+                    <input type="password" name="confirmPassword" required>
+                </div>
+                <button class="save-btn" type="submit">Xác nhận</button>
+            </form>
+            {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            {% if success %}
+            <div class="alert alert-success">
+                {{ success }}
+            </div>
+            {% endif %}
+
+        </section>
+
+        <!-- Đơn mua -->
+        <section class="section orders-section {% if active_section == 'orders' %}active{% endif %}">
+            <div class="section-header">
+                <h2>Đơn mua</h2>
+                <p>Bạn đã đặt <strong>{{ order_count }}</strong> đơn hàng.</p>
+            </div>
+
+            {% for order in orders %}
+            <div class="order-box">
+                <div class="order-header">
+                    <h4>Mã đơn: DH{{ order.id }}</h4>
+                    <span class="order-status {{ order.status|lower }}">
+                    {{ order.status }}
+                </span>
+                </div>
+
+                <div class="order-info">
+                    <p> Ngày đặt: {{ order.order_date|date:"d/m/Y H:i" }}</p>
+                    <p class="order-total">
+                        Tổng tiền: {{ order.formatted_price }}
+                    </p>
+                </div>
+
+                <details class="order-details">
+                    <summary> Xem chi tiết đơn hàng</summary>
+
+                    <div class="order-detail-box">
+                        <p><b>Mã đơn:</b> DH{{ order.id }}</p>
+
+                        {% if order.shipping_info %}
+                        <p><b>Địa chỉ giao hàng:</b>
+                            {{ order.shipping_info.recipient_name }}
+                            {{ order.shipping_info.phone }}
+                            {{ order.shipping_info.address_line }}
+                            {{ order.shipping_info.ward }}
+                            {{ order.shipping_info.district }}
+                            {{ order.shipping_info.city }}
+                        </p>
+                        {% endif %}
+
+                        <table class="order-detail-table">
+                            <tr>
+                                <th>Ảnh sản phẩm</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Giá</th>
+                                <th>Hành động</th>
+                            </tr>
+
+                            {% for item in order.items %}
+                            <tr>
+                                <td><a href="{% url 'productDetail' item.product.id %}"><img src="{{ item.product.image_main.url }}" alt=""></a></td>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.formatted_price}}</td>
+                               <td>
+    {% if order.status == "Đang xử lý" %}
+        <form method="post" action="{% url 'cancel_order' order.id %}"
+              onsubmit="return confirm('Bạn có chắc muốn huỷ đơn hàng này không?');">
+            {% csrf_token %}
+            <button type="submit" class="btn-cancel">
+                Huỷ đơn hàng
+            </button>
+        </form>
+
+    {% elif order.status == "Đã thanh toán" or order.status == "hoàn thành" %}
+        {% if not item.has_reviewed %}
+            <a href="{% url 'productDetail' item.product.id %}"
+               class="btn-review">
+                Đánh giá
+            </a>
+        {% else %}
+            <span style="color: gray;">Đã đánh giá</span>
+        {% endif %}
+    {% endif %}
+</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+
+                        <p class="order-detail-total" style="color: red;">
+                            Tổng tiền: {{ order.formatted_price }}
+                        </p>
+                    </div>
+                </details>
+
+
+            </div>
+            {% endfor %}
+        </section>
+            <!-- Đơn đã huỷ -->
+<section class="section orders-section
+{% if active_section == 'cancelled_orders' %}active{% endif %}">
+
+    <div class="section-header">
+        <h2>Đơn đã huỷ</h2>
+    </div>
+
+    {% for order in cancelled_orders %}
+    <div class="order-box cancelled">
+        <div class="order-header">
+            <h4>Mã đơn: DH{{ order.id }}</h4>
+            <span class="order-status cancelled">Đã huỷ</span>
+        </div>
+
+        <div class="order-info">
+            <p>Ngày đặt: {{ order.order_date|date:"d/m/Y H:i" }}</p>
+            <p class="order-total">
+                Tổng tiền: {{ order.formatted_price }}
+            </p>
+        </div>
+    </div>
+    {% empty %}
+        <p style="color: gray;">Chưa có đơn hàng nào bị huỷ.</p>
+    {% endfor %}
+
+</section>
+
+            <!-- Địa chỉ -->
+        </section>
+
+        <section class="section {% if active_section == 'address' %}active{% endif %}">
+                <h2>Địa chỉ nhận hàng</h2>
+
+                <!-- Form thêm địa chỉ -->
+                <form method="post" action="{% url 'profile_address' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Người nhận</label>
+                        <input type="text" name="recipient_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại</label>
+                        <input type="text" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Địa chỉ</label>
+                        <input type="text" name="address_line" required>
+                    </div>
+                  <div class="form-group">
+                  <label>Tỉnh / Thành phố</label>
+                  <select name="city" id="province" required>
+                    <option value="">-- Chọn tỉnh/thành --</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Xã / Phường</label>
+                  <select name="ward" id="ward" required>
+                    <option value="">-- Chọn xã/phường --</option>
+                  </select>
+                </div>
+                <input type="hidden" id="provinceCodeInput" name="province_code">
+                <input type="hidden" id="wardCodeInput" name="ward_code">
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_default" id="defaultCheck">
+                        <label class="form-check-label" for="defaultCheck">
+                            Mặc định
+                        </label>
+                    </div>
+                    <button class="save-btn" type="submit">Xác nhận</button>
+                </form>
+
+                <!-- Danh sách địa chỉ -->
+              <h4>Danh sách địa chỉ đã lưu</h4>
+
+                <ul class="address-list">
+                  {% for addr in addresses %}
+                  <li class="address-item {% if addr.is_default %}default{% endif %}">
+
+                    <div class="address-info">
+                      <div class="address-header">
+                        <strong>{{ addr.recipient_name }}</strong>
+                        <span class="phone">{{ addr.phone }}</span>
+
+                        {% if addr.is_default %}
+                          <span class="badge-default">Mặc định</span>
+                        {% endif %}
+                      </div>
+
+                      <div class="address-text">
+                        {{ addr.address_line }}, {{ addr.ward }}, {{ addr.city }}
+                      </div>
+                    </div>
+
+                    <div class="address-actions">
+                      {% if not addr.is_default %}
+                        <a href="{% url 'set_default_address' addr.id %}" class="btn btn-default">
+                          Đặt mặc định
+                        </a>
+                      {% endif %}
+
+                      <a href="{% url 'delete_address' addr.id %}"
+                         class="btn btn-delete"
+                         onclick="return confirm('Bạn có chắc muốn xóa địa chỉ này không?')">
+                         Xóa
+                      </a>
+                    </div>
+
+                  </li>
+                  {% empty %}
+                  <li class="empty">Chưa có địa chỉ nào.</li>
+                  {% endfor %}
+                </ul>
+
+            </section>
+    </main>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  // ================ API V2 (2025) - CHỈ CÓ 2 CẤP ================
+  const API_BASE = "https://provinces.open-api.vn/api/v2";
+
+  const provinceSelect = document.getElementById("province");
+  const wardSelect = document.getElementById("ward");
+
+  if (!provinceSelect || !wardSelect) {
+    console.error("❌ Không tìm thấy select province / ward");
+    return;
+  }
+
+  // 1️⃣ Load danh sách Tỉnh/Thành phố
+  fetch(`${API_BASE}/p/`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(provinces => {
+      provinces.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.name;        // ✅ VALUE LÀ TÊN
+        opt.textContent = p.name;
+        opt.dataset.code = p.code;
+        provinceSelect.appendChild(opt);
+      });
+    })
+    .catch(err => {
+      console.error("Lỗi load tỉnh:", err);
+      alert("Không thể tải danh sách tỉnh/thành phố");
+    });
+
+  // 2️⃣ Khi chọn Tỉnh → load Phường/Xã
+  provinceSelect.addEventListener("change", () => {
+
+    const selectedOption = provinceSelect.options[provinceSelect.selectedIndex];
+    const code = selectedOption?.dataset.code;
+
+    document.getElementById("provinceCodeInput").value = code || "";
+
+    wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+    wardSelect.disabled = true;
+    document.getElementById("wardCodeInput").value = "";
+
+    if (!code) return;
+
+    fetch(`${API_BASE}/p/${code}?depth=2`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+
+        // ⚠️ API này CHỈ CHẠY nếu data.wards tồn tại
+        if (data.wards && data.wards.length > 0) {
+
+          data.wards.forEach(w => {
+            const opt = document.createElement("option");
+            opt.value = w.name;
+            opt.textContent = w.name;
+            opt.dataset.code = w.code;
+            wardSelect.appendChild(opt);
+          });
+
+          wardSelect.disabled = false;
+
+        } else {
+          alert("Không có phường/xã cho tỉnh này");
+        }
+      })
+      .catch(err => {
+        console.error("Lỗi load phường/xã:", err);
+        alert("Không thể tải danh sách phường/xã");
+      });
+  });
+
+  // 3️⃣ Cập nhật ward_code
+  wardSelect.addEventListener("change", () => {
+    const opt = wardSelect.options[wardSelect.selectedIndex];
+    document.getElementById("wardCodeInput").value = opt?.dataset.code || "";
+  });
+
+});
+</script>
+
+
+{% endblock %}
+
+

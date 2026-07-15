@@ -1,0 +1,51 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<form method="post">
+  {% csrf_token %}
+  <div class="form-section">
+    <h3>Thêm địa chỉ nhận hàng</h3>
+
+    <div class="form-group">
+      <label>Họ tên người nhận</label>
+      <input type="text" name="recipient_name" required>
+    </div>
+
+    <div class="form-group">
+      <label>Số điện thoại</label>
+      <input type="tel" name="phone" required>
+    </div>
+
+    <div class="form-group">
+      <label>Địa chỉ cụ thể</label>
+      <input type="text" name="address_line" required>
+    </div>
+
+    <div class="form-group">
+  <label>Tỉnh / Thành phố</label>
+  <select name="city" id="city" required>
+    <option value="">-- Chọn tỉnh/thành --</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Quận / Huyện</label>
+  <select name="district" id="district" required>
+    <option value="">-- Chọn quận/huyện --</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Xã / Phường</label>
+  <select name="ward" id="ward">
+    <option value="">-- Chọn xã/phường --</option>
+  </select>
+</div>
+
+
+    <label>
+      <input type="checkbox" name="is_default"> Đặt làm địa chỉ mặc định
+    </label>
+  </div>
+  <button type="submit" class="save-btn">Lưu thay đổi</button>
+</form>
+

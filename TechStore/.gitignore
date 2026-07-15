@@ -1,0 +1,11 @@
+# Ignore all files in the 'venv' directory
+venv/
+__pycache__/
+*/__pycache__/
+.idea/
+*.iml
+
+TechStore/sentiment/
+*.safetensors
+*.bin
+spam_detector/
